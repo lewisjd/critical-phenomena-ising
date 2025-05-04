@@ -12,12 +12,18 @@
 
 using namespace std;
 
-// IsingSystem class: this is where the Ising simulation happens
+// Lattice types for the simulation
+enum LatticeType { LATTICE_2D, LATTICE_3D_SC, LATTICE_3D_BCC };
+
+// Hard-coded lattice type (set one of the above)
+static constexpr LatticeType currentLattice = LATTICE_3D_BCC;
+
 class IsingSystem {
 private:
     // size of grid: fixed constant
-    static const int gridSize = 128;
-    int** grid;  // 2D array storing each site's spin (+1 or -1)
+    static const int gridSize = 64;
+    // Grid storing each site's spin (+1 or -1) in a flattened 1D array
+    std::vector<int> grid;
 
     rnd rgen;    // random number generator
 
@@ -28,7 +34,7 @@ private:
     ofstream logfile;   // output file for logging
 
     int sweepCount = 0;
-    static constexpr int maxSweeps = 150;
+    static constexpr int maxSweeps = 100;
 
     int acceptedFlips = 0;  // count of accepted single-spin flips per sweep
     std::vector<double> calculateCorrelation();
@@ -45,15 +51,9 @@ public:
     // set the random seed
     void setSeed(int s) { rgen.setSeed(s); }
 
-    // functions to update the system
-    double computeLocalField(int pos[]);
-    void attemptSpinFlip();
-    void MCsweep();
-
     // adjust temperature
     void Hotter() { inverseTemperatureBeta -= 0.05; }
     void Colder() { inverseTemperatureBeta += 0.05; }
-
     void setTemperature(double TT) { inverseTemperatureBeta = 1.0 / TT; }
 
     // access grid entries via functions
@@ -75,10 +75,10 @@ public:
     void setFast() { slowNotFast = 0; }
 
     // set setpos to the position of a neighbour of pos
-    // val = 0,1,2,3 determines which neighbour (with periodic BC)
+    // val = 0..3 (2D), 0..5 (3D SC), 0..7 (3D BCC) determines neighbour (periodic BC)
     void setPosNeighbour(int setpos[], int pos[], int val);
 
-    // perform a Monte Carlo or Swendsen-Wang sweep
+    // perform one Swendsen–Wang sweep
     void Update();
 
     // draw the system (no-op after removing graphics)
@@ -87,7 +87,7 @@ public:
     double calculateMagnetisation();
     double calculateEnergy();
 
-    void SWsweep(); // one Swendsen-Wang sweep
+    void SWsweep(); // one Swendsen–Wang sweep
 
     void resetSweepCount() { sweepCount = 0; }
 };
