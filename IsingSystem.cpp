@@ -25,7 +25,7 @@ IsingSystem::IsingSystem() {
     // initialize temperature and grid
     Reset();
 
-    logfile.open("BCCdataL64.txt");
+    logfile.open("MCsweepdata.txt");
     std::vector<int> rs = {
         1,2,3,4,5,6,7,8,9,10,
         50,75,100,125,150,175,200,225,250
@@ -533,7 +533,8 @@ void IsingSystem::setPosNeighbour(int setpos[], int pos[], int val) {
 
 // update the system: one Swendsen-Wang sweep, log data, check sweeps
 void IsingSystem::Update() {
-    SWsweep();
+    MCsweep();
+    //SWsweep();
     ++sweepCount;
 
     double M = calculateMagnetisation();
@@ -563,5 +564,29 @@ void IsingSystem::Update() {
     cout << "Sweep " << sweepCount << "/" << maxSweeps << "\n";
     if (sweepCount >= maxSweeps) {
         pauseRunning();
+    }
+}
+
+// one Metropolis sweep (2D only)
+void IsingSystem::MCsweep() {
+    acceptedFlips = 0;
+    int N = gridSize * gridSize;     // 2D only
+    for (int idx = 0; idx < N; ++idx) {
+        // pick spin at random
+        int i = idx / gridSize, j = idx % gridSize;
+        int s = grid[idx];
+        
+        // sum over 4 neighbours (periodic BC)
+        int up = grid[((i - 1 + gridSize) % gridSize) * gridSize + j];
+        int down = grid[((i + 1) % gridSize) * gridSize + j];
+        int left = grid[i * gridSize + (j - 1 + gridSize) % gridSize];
+        int right = grid[i * gridSize + (j + 1) % gridSize];
+        
+        int deltaE = 2 * s * (up + down + left + right);
+        if (deltaE <= 0 || rgen.random01() < std::exp(-deltaE * inverseTemperatureBeta)) {
+            grid[idx] = -s;
+            ++acceptedFlips;
+            
+        }
     }
 }

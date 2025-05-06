@@ -16,12 +16,12 @@ using namespace std;
 enum LatticeType { LATTICE_2D, LATTICE_3D_SC, LATTICE_3D_BCC };
 
 // Hard-coded lattice type (set one of the above)
-static constexpr LatticeType currentLattice = LATTICE_3D_BCC;
+static constexpr LatticeType currentLattice = LATTICE_2D;
 
 class IsingSystem {
 private:
     // size of grid: fixed constant
-    static const int gridSize = 64;
+    static const int gridSize = 500;
     // Grid storing each site's spin (+1 or -1) in a flattened 1D array
     std::vector<int> grid;
 
@@ -34,7 +34,7 @@ private:
     ofstream logfile;   // output file for logging
 
     int sweepCount = 0;
-    static constexpr int maxSweeps = 100;
+    static constexpr int maxSweeps = 1000;
 
     int acceptedFlips = 0;  // count of accepted single-spin flips per sweep
     std::vector<double> calculateCorrelation();
@@ -87,6 +87,7 @@ public:
     double calculateMagnetisation();
     double calculateEnergy();
 
+    void MCsweep(); // perform one Metropolis sweep
     void SWsweep(); // one Swendsen–Wang sweep
 
     void resetSweepCount() { sweepCount = 0; }
