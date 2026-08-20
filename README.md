@@ -41,22 +41,6 @@ critical-phenomena-ising/
 
 `IsingSystem::Update()` currently calls `MCsweep()` by default, with a call to `SWsweep()` present but commented out — swap which one is called (and recompile) to switch update schemes.
 
-## Building
-
-Requires a C++17 compiler (no external dependencies beyond the standard library).
-
-```bash
-g++ -O2 -std=c++17 MAIN_Source.cpp IsingSystem.cpp -o ising
-```
-
-## Running
-
-```bash
-./ising
-```
-
-For each `β` in the hardcoded list in `MAIN_Source.cpp`, the simulation resets the lattice to an all-spins-down state, sets the temperature, and runs `maxSweeps` update sweeps, appending one row per sweep to `MCsweepdata.txt` in the working directory (created/overwritten on each run).
-
 ## Configuration
 
 There's no command-line interface — everything is a compile-time constant, so changing settings means editing the source and rebuilding:
